@@ -15,8 +15,7 @@ function animate() {
 function resize(object) {
   const box = new THREE.Box3().setFromObject(object);
   const size = box.getSize(new THREE.Vector3());
-  const distance = (Math.max(size.x, size.y, size.z) * 3) / 4;
-  object.scale.setScalar(1 / distance);
+  object.scale.setScalar(1 / Math.max(size.x, size.y, size.z));
 }
 
 function focusOnObject(object) {
@@ -24,11 +23,7 @@ function focusOnObject(object) {
   const size = box.getSize(new THREE.Vector3());
   const distance = (Math.max(size.x, size.y, size.z) * 3) / 4;
   const center = box.getCenter(new THREE.Vector3());
-  camera.position.set(
-    center.x - distance,
-    center.y + distance,
-    center.z - distance
-  );
+  camera.position.set(center.x, center.y, center.z + 2 * distance);
   controls.target.copy(center);
   controls.update();
 }
