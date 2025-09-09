@@ -342,7 +342,7 @@ import {
 
       function buildAnimationChannel(channel, inputSource, outputSource) {
         const node = library.nodes[channel.id];
-        const object3D = getNode(node.id);
+        const object3D = getNodes(node.id)[0];
 
         const transform = node.transforms[channel.sid];
         const defaultMatrix = node.matrix.clone().transpose();
@@ -3139,8 +3139,9 @@ import {
             "ColladaLoader: There is already a node with ID %s. Exclude current node from further processing.",
             data.id
           );
+          library.nodes[data.id].push(data);
         } else {
-          library.nodes[data.id] = data;
+          library.nodes[data.id] = [data];
         }
 
         return data;
@@ -3197,7 +3198,7 @@ import {
           let root;
 
           if (hasNode(skeleton)) {
-            root = getNode(skeleton);
+            root = getNodes(skeleton)[0];
             buildBoneHierarchy(root, joints, boneData);
           } else if (hasVisualScene(skeleton)) {
             // handle case where the skeleton refers to the visual scene (#13335)
@@ -3209,7 +3210,7 @@ import {
               const child = children[j];
 
               if (child.type === "JOINT") {
-                const root = getNode(child.id);
+                const root = getNodes(child.id)[0];
                 buildBoneHierarchy(root, joints, boneData);
               }
             }
@@ -3313,7 +3314,9 @@ import {
         // nodes
 
         for (let i = 0, l = nodes.length; i < l; i++) {
-          objects.push(getNode(nodes[i]));
+          getNodes(nodes[i]).forEach((node) => {
+            objects.push(node);
+          });
         }
 
         // instance cameras
@@ -3380,7 +3383,9 @@ import {
         // instance nodes
 
         for (let i = 0, l = instanceNodes.length; i < l; i++) {
-          objects.push(getNode(instanceNodes[i]).clone());
+          getNodes(instanceNodes[i]).forEach((node) => {
+            objects.push(node.clone());
+          });
         }
 
         let object;
@@ -3519,8 +3524,12 @@ import {
         return library.nodes[id] !== undefined;
       }
 
-      function getNode(id) {
-        return getBuild(library.nodes[id], buildNode);
+      function getNodes(id) {
+        const builds = [];
+        library.nodes[id].forEach((node) => {
+          builds.push(getBuild(node, buildNode));
+        });
+        return builds;
       }
 
       // visual scenes
@@ -3551,7 +3560,9 @@ import {
         for (let i = 0; i < children.length; i++) {
           const child = children[i];
 
-          group.add(getNode(child.id));
+          getNodes(child.id).forEach((node) => {
+            group.add(node);
+          });
         }
 
         return group;
