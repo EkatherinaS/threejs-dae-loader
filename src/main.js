@@ -60,7 +60,8 @@ loader.load(
   () => {},
   (e) => {
     console.log(e);
-  }
+  },
+  { texturedMeshesOnly: false }
 );
 
 animate();

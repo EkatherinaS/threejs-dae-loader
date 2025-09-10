@@ -5,6 +5,7 @@ import {
   Vector3,
   Quaternion,
   Matrix4,
+  DirectionalLight,
   MeshBasicMaterial,
   TextureLoader,
   Color,
@@ -14,14 +15,22 @@ import {
   BufferGeometry,
   Float32BufferAttribute,
   Group,
+  LineBasicMaterial,
+  AmbientLight,
+  MathUtils,
+  PerspectiveCamera,
   Mesh,
+  Scene,
 } from "three";
 
 (() => {
+  let texturedMeshesOnly;
+
   class ColladaLibLoader extends Loader {
-    load(url, onLoad, onProgress, onError) {
+    load(url, onLoad, onProgress, onError, options = undefined) {
       const scope = this;
 
+      texturedMeshesOnly = options?.texturedMeshesOnly;
       const path =
         scope.path === "" ? LoaderUtils.extractUrlBase(url) : scope.path;
 
@@ -933,7 +942,6 @@ import {
 
       function parseEffect(xml) {
         const data = {};
-
         for (let i = 0, l = xml.childNodes.length; i < l; i++) {
           const child = xml.childNodes[i];
 
@@ -1046,7 +1054,6 @@ import {
 
       function parseEffectTechnique(xml) {
         const data = {};
-
         for (let i = 0, l = xml.childNodes.length; i < l; i++) {
           const child = xml.childNodes[i];
 
@@ -3494,6 +3501,8 @@ import {
 
           let object;
 
+          const aaaaaa = [];
+
           switch (type) {
             case "lines":
               object = new LineSegments(geometry.data, material);
@@ -3513,8 +3522,7 @@ import {
 
               break;
           }
-
-          objects.push(object);
+          if (material.map || !texturedMeshesOnly) objects.push(object);
         }
 
         return objects;
